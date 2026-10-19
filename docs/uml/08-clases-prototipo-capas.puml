@@ -1,0 +1,113 @@
+@startuml 08-clases-prototipo-capas
+title Prototipo de consola: capas, estructuras de datos y algoritmos
+
+skinparam monochrome true
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam defaultFontSize 13
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+}
+skinparam package {
+  BackgroundColor #FFFFFF
+  BorderColor #555555
+}
+hide circle
+hide empty members
+
+package vista {
+  class App {
+    + {static} main(args)
+  }
+  class MenuPrincipal {
+    + iniciar()
+    - ejecutar(opcion)
+  }
+  class Consola {
+    + leerTexto(mensaje) : String
+    + leerEntero(mensaje, min, max) : int
+    + leerImporte(mensaje) : BigDecimal
+  }
+}
+
+package servicio {
+  class Plataforma {
+    - pagosPendientes : Cola<SolicitudPago>
+    + listarCursos(criterio) : ListaEnlazada<Curso>
+    + buscarCursoPorCodigo(codigo) : Curso
+    + inscribir(alumno, curso, medio) : Inscripcion
+    + procesarSiguientePago() : Pago
+    + completarLeccion(alumno, curso, orden)
+    + deshacerUltimaLeccion(alumno, curso)
+  }
+  enum CriterioOrden {
+    CODIGO
+    TITULO
+    PRECIO_MENOR
+    PRECIO_MAYOR
+    DURACION
+  }
+  class SolicitudPago
+}
+
+package persistencia {
+  interface "Repositorio<T>" as Repositorio {
+    + listarTodos() : ListaEnlazada<T>
+    + guardar(entidad : T)
+  }
+  class ConexionBD {
+    + {static} abrir() : Connection
+  }
+  class AcademiaDao
+  class AlumnoDao
+  class CursoDao
+  class InscripcionDao
+}
+
+package estructuras {
+  class "ListaEnlazada<T>" as ListaEnlazada {
+    + agregar(dato)
+    + obtener(indice) : T
+    + eliminar(indice) : T
+  }
+  class "Pila<T>" as Pila {
+    + apilar(dato)
+    + desapilar() : T
+  }
+  class "Cola<T>" as Cola {
+    + encolar(dato)
+    + desencolar() : T
+  }
+  class "Nodo<T>" as Nodo
+}
+
+package algoritmos {
+  class Ordenamiento {
+    + {static} quickSort(lista, criterio)
+  }
+  class Busqueda {
+    + {static} binaria(lista, clave, extractor)
+    + {static} secuencial(lista, condicion)
+  }
+}
+
+App --> MenuPrincipal
+MenuPrincipal --> Consola
+MenuPrincipal --> Plataforma
+Plataforma --> CriterioOrden
+Plataforma --> SolicitudPago
+Plataforma ..> persistencia : usa los DAO
+Plataforma ..> estructuras : guarda los datos en
+Plataforma ..> algoritmos : ordena y busca con
+Repositorio <|.. AcademiaDao
+Repositorio <|.. AlumnoDao
+Repositorio <|.. CursoDao
+Repositorio <|.. InscripcionDao
+Repositorio -[hidden]right- ConexionBD
+ListaEnlazada o-- Nodo
+Pila o-- Nodo
+Cola o-- Nodo
+Ordenamiento -[hidden]right- Busqueda
+Nodo -[hidden]down-> Ordenamiento
+@enduml

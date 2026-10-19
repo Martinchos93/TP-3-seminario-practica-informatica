@@ -1,0 +1,125 @@
+@startuml 07-clases-prototipo-modelo
+title Prototipo de consola: clases del modelo
+
+skinparam monochrome true
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam defaultFontSize 13
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+}
+hide circle
+hide empty members
+
+class Academia {
+  - id : int
+  - razonSocial : String
+  - cuit : String
+  + Academia(razonSocial, cuit)
+}
+
+class Curso {
+  - id : int
+  - codigo : String
+  - titulo : String
+  - precio : BigDecimal
+  - estado : EstadoCurso
+  + Curso(codigo, titulo, precio, academia)
+  + agregarLeccion(leccion)
+  + publicar()
+  + getDuracionTotalMinutos() : int
+  + compareTo(otro) : int
+}
+
+abstract class Leccion {
+  - id : int
+  - titulo : String
+  - orden : int
+  # Leccion(id, titulo, orden)
+  + {abstract} duracionEstimadaMinutos() : int
+  + {abstract} getTipo() : String
+}
+
+class LeccionVideo {
+  - duracionSegundos : int
+  + duracionEstimadaMinutos() : int
+}
+class LeccionTexto {
+  - cantidadPalabras : int
+  + duracionEstimadaMinutos() : int
+}
+class LeccionCuestionario {
+  - cantidadPreguntas : int
+  + duracionEstimadaMinutos() : int
+}
+
+class Alumno {
+  - id : int
+  - nombre : String
+  - apellido : String
+  - email : String
+  + Alumno(nombre, apellido, email)
+}
+
+class Inscripcion {
+  - id : int
+  - estado : EstadoInscripcion
+  - fecha : LocalDateTime
+  - leccionesCompletadas : Pila<Leccion>
+  + activar()
+  + completarLeccion(leccion)
+  + deshacerUltimaLeccion() : Leccion
+  + porcentajeAvance() : int
+}
+
+abstract class MedioPago {
+  - titular : String
+  + {abstract} calcularImporteFinal(precio) : BigDecimal
+  + {abstract} autorizar()
+  + {abstract} getTipo() : String
+  + {abstract} getDetalle() : String
+}
+
+abstract class Tarjeta {
+  - numero : String
+  + autorizar()
+}
+class TarjetaCredito {
+  - cuotas : int
+  + calcularImporteFinal(precio) : BigDecimal
+}
+class TarjetaDebito {
+  + calcularImporteFinal(precio) : BigDecimal
+}
+class Transferencia {
+  - cbu : String
+  + calcularImporteFinal(precio) : BigDecimal
+  + autorizar()
+}
+
+class Pago {
+  - id : int
+  - medio : String
+  - importe : BigDecimal
+  - estado : EstadoPago
+  - motivoRechazo : String
+}
+
+interface "Comparable<Curso>" as Comparable
+
+Academia "1" -- "0..*" Curso : dicta >
+Curso *-- "1..*" Leccion : se compone de >
+Leccion <|-- LeccionVideo
+Leccion <|-- LeccionTexto
+Leccion <|-- LeccionCuestionario
+Comparable <|.. Curso
+Alumno "1" -- "0..*" Inscripcion
+Curso "1" -- "0..*" Inscripcion
+Inscripcion "1" -- "0..*" Pago : se paga con >
+MedioPago <|-- Tarjeta
+Tarjeta <|-- TarjetaCredito
+Tarjeta <|-- TarjetaDebito
+MedioPago <|-- Transferencia
+Pago ..> MedioPago : se crea a partir de
+@enduml
